@@ -4,7 +4,7 @@ import config
 import pdb
 import os
 import textwrap
-import datetime
+from time import gmtime, strftime
 
 def isBinary(inputString):
     for letter in inputString:
@@ -35,7 +35,10 @@ for comment in subreddit.stream.comments():
     if len(commentBody) % 8 == 0 and len(commentBody) != 0 and isBinary(commentBody) == True:
         commentBody = convertToASCII(commentBody)
         print("The comment says: \n" + commentBody)
-        print("\n By: " + comment.author.name + " in r/" + comment.subreddit.display_name + " at " + str(now) + " \n")
+        print("\n By: " + comment.author.name + " in r/"
+              + comment.subreddit.display_name
+              + " at "
+              + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " \n")
         print("It has " + str(comment.score) + " upvotes.\n")
         print("------------------------------------\n")
         reply = "The comment says: \n \n" + commentBody + "\n \n ^I ^am ^a ^bot."
