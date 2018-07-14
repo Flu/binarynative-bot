@@ -4,7 +4,7 @@ import config
 import pdb
 import os
 import textwrap
-from time import gmtime, strftime
+import datetime
 
 def isBinary(inputString):
     for letter in inputString:
@@ -14,9 +14,11 @@ def isBinary(inputString):
 def convertToASCII(inputString):
     stringLength = len(inputString)//8
     outputList = []    
-    asciiDict = {i: chr(i) for i in range(129)}
+    asciiDict = {i: chr(i) for i in range(255)}
     parts = textwrap.wrap(inputString, 8)
     print(parts)
+    with open("log", "a") as logFile:
+            logFile.write(str(parts))
     for current in parts:
         outputList.append(asciiDict[int(current, 2)])
     outputString = ''.join(outputList)
@@ -31,16 +33,17 @@ reddit = praw.Reddit(username=config.username,
 subreddit = reddit.subreddit("all")
 for comment in subreddit.stream.comments():
     commentBody = comment.body.replace(" ", "")
-    #print(titleString + "\n")
     if len(commentBody) % 8 == 0 and len(commentBody) != 0 and isBinary(commentBody) == True:
         commentBody = convertToASCII(commentBody)
-        print("The comment says: \n" + commentBody)
-        print("\n By: " + comment.author.name + " in r/"
-              + comment.subreddit.display_name
-              + " at "
-              + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " \n")
-        print("It has " + str(comment.score) + " upvotes.\n")
-        print("------------------------------------\n")
+        currentTime = datetime.datetime.now()
+        logEntry = "\nThe comment says: \n\n" + commentBody
+        logEntry += "\n\nBy: " + comment.author.name + " in r/"
+        logEntry += comment.subreddit.display_name + " at "
+        logEntry += currentTime.strftime("%Y-%m-%d %H:%M:%S")
+        logEntry += " \n\n ------------------ \n\n"
+        print(logEntry)
+        with open("log", "a") as logFile:
+            logFile.write(logEntry)
         reply = "The comment says: \n \n" + commentBody + "\n \n ^I ^am ^a ^bot."
-        reply += " ^PM ^my ^[creator](https://reddit.com/user/romanianRunner) ^if ^I ^did ^something ^wrong."
+        reply += " ^PM ^my ^[creator](https://reddit.com/user/orangeFluu) ^if ^I ^did ^something ^wrong."
         comment.reply(reply)
